@@ -5,7 +5,7 @@ import bodyParser from "body-parser";
 import mongoose from 'mongoose';
 
 require('dotenv').config();
-import { ENV_DB_URL } from "./config";
+import { ENV_DB_URL, JWT_SECRET } from "./config";
 
 console.log('initializing project');
 
@@ -24,11 +24,13 @@ mongoose
   .then(result => {
     console.log('DB result :>> CONNECTED');
   })
-  .catch(err => console.log('DB err :>> ', err))
+  .catch(err => console.log('DB err :>> ',ENV_DB_URL, err))
 
 app.listen(8017, () => {
   console.clear();
   console.log('APP is listening on 8017');
+  console.log('ENV_DB_URL :>> ', ENV_DB_URL);
+  console.log('JWT_SECRET :>> ', JWT_SECRET);
 });
 
 
