@@ -38,7 +38,8 @@ export const CreateVendor = async (req: Request, res: Response, next: NextFuncti
     serviceAvailable: false,
     password: userPassword,
     phone: phone,
-    pincode: pincode
+    pincode: pincode,
+    foods: []
   });
 
   return res.status(201).json(createdVendor);

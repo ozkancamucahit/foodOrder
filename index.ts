@@ -3,6 +3,7 @@ import express from "express";
 import { AdminRoute, VendorRoute } from "./routes";
 import bodyParser from "body-parser";
 import mongoose from 'mongoose';
+import path from 'path';
 
 require('dotenv').config();
 import { ENV_DB_URL, JWT_SECRET } from "./config";
@@ -14,6 +15,8 @@ console.clear()
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
+
+app.use('/images', express.static(path.join(__dirname, 'images')));
 
 app.use('/admin', AdminRoute);
 app.use('/vendor', VendorRoute);
