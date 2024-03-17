@@ -13,7 +13,7 @@ export default async (app :Application) => {
   app.use(express.urlencoded({extended: true}));
   
   app.use('/images', express.static(path.join(__dirname, 'images')));
-  
+  app.get("/", (req, res) => res.send("Express on Vercel"));
   app.use('/admin', AdminRoute);
   app.use('/vendor', VendorRoute);
   app.use('/shopping', ShoppingRoute);
