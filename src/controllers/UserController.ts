@@ -1,10 +1,11 @@
 import { NextFunction, Request, Response } from "express";
-import { FoodDoc, Vendor } from "../models";
+import { Food, FoodDoc, Vendor } from "../models";
 import { plainToClass, plainToInstance } from "class-transformer";
-import { CreateUserInputs, EditUserProfileInputs, UserLoginInputs } from "../dto/User.dto";
+import { CreateUserInputs, EditUserProfileInputs, OrderInputs, UserLoginInputs } from "../dto/User.dto";
 import { validate } from "class-validator";
 import { GenerateOtp, GeneratePassword, GenerateSalt, GenerateSignature, ValidatePassword, onRequestOtp } from "../utility";
 import { User } from "../models/User";
+import { Order } from "../models/Order";
 
 export const UserSingup = async (req: Request, res: Response, next: NextFunction) => {
 
@@ -20,11 +21,12 @@ export const UserSingup = async (req: Request, res: Response, next: NextFunction
   const salt = await GenerateSalt();
   const userPassword = await GeneratePassword(password, salt);
 
-  const {otp, expiry} = GenerateOtp();
+  //  const {otp, expiry} = GenerateOtp();
 
-  const existingUser = User.findOne({email: email});
+  const existingUser = await User.findOne({email: email});
 
   if(existingUser !== null){
+    console.log('existingUser :>> ', existingUser);
     return res.status(400).json({message : "User exists with same email"});
   }
 
@@ -32,21 +34,22 @@ export const UserSingup = async (req: Request, res: Response, next: NextFunction
     email: email,
     password: userPassword,
     salt: salt,
-    otp: otp,
+    otp: 1717, //otp,
     phone: phone,
-    otp_expiry: expiry,
+    otp_expiry: new Date(), //expiry,
     firstName: '',
     LastName: '',
     address: '',
     verified: false,
     lat: 0,
-    lon: 0
+    lon: 0,
+    orders: []
   });
   
   if(result){
     // send otp to user
 
-    await onRequestOtp(otp, phone);
+    // await onRequestOtp(otp, phone);
     // generate the signature
 
     const signature = GenerateSignature({
@@ -203,5 +206,86 @@ export const EditUserProfile = async (req: Request, res: Response, next: NextFun
     
   }
 }
+
+export const CreateOrder = async (req: Request, res: Response, next: NextFunction) => {
+
+  const user = req.user;
+
+  if(user){
+
+    const orderId = `${Math.floor(Math.random() * 89999) + 1000}`;
+    const profile = await User.findById(user._id);
+    console.log('profile :>> ', profile);
+    console.log('user._id :>> ', user._id);
+    const cart = <[OrderInputs]>req.body;
+
+    let cartItems = Array();
+    let netAmount = 0.0;
+
+    // CALCULATE ORDER AMOUNT 
+    const foods = await Food.find().where('_id').in(cart.map(item => item._id)).exec();
+
+    foods.map(food => {
+      cart.map(({_id, unit}) => {
+        if (food._id == _id){
+          netAmount += (food.price * unit);
+          cartItems.push({food, unit});
+        }
+      })
+    });
+
+    if(cartItems){
+
+      const currentOrder = await Order.create({
+        orderId: orderId,
+        items: cartItems,
+        totalAmount: netAmount,
+        orderDate: new Date(),
+        paidThrough: "COD",
+        paymentResponse: "",
+        orderStatus: "Waiting"
+      });
+
+      if (currentOrder){
+        profile.orders.push(currentOrder);
+        await profile.save();
+
+        return res.json(currentOrder); 
+      }
+    }
+  }
+
+  return res.status(400).json({message : "Error creating Order"});
+
+}
+
+export const GetOrders = async (req: Request, res: Response, next: NextFunction) => {
+
+  const user = req.user;
+
+  if(user){
+    const profile = await User.findById(user._id).populate("orders");
+
+    if(profile){
+      
+      return res.status(200).json(profile.orders);
+    }
+    
+  }
+}
+
+export const GetOrderById = async (req: Request, res: Response, next: NextFunction) => {
+
+  const orderId = req.params.id;
+  
+  if(orderId){
+    const order = await Order.findById(orderId).populate("items.food");
+    return res.json(order);
+  }
+
+
+}
+
+
 
 

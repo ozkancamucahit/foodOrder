@@ -22,7 +22,7 @@ export const VendorLogin = async (req: Request, res: Response, next: NextFunctio
         _id: existingVendor.id,
         email: existingVendor.email,
         foodTypes: existingVendor.foodType,
-        name: existingVendor.name
+        name: existingVendor.name 
       });
 
       return res.json(signature);

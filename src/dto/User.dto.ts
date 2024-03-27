@@ -1,51 +1,42 @@
-
 import { IsEmail, IsEmpty, Length } from "class-validator";
 
-
 export class CreateUserInputs {
-
   @IsEmail()
-  email :string;
+  email: string;
 
-  @IsEmpty()
   @Length(7, 18)
-  phone :string;
+  phone: string;
 
-  @IsEmpty()
   @Length(6, 12)
-  password :string;
+  password: string;
 }
 
 export class UserLoginInputs {
-
   @IsEmail()
-  email :string;
+  email: string;
 
-  @IsEmpty()
   @Length(6, 12)
-  password :string;
+  password: string;
 }
 
 export class EditUserProfileInputs {
-
   @Length(6, 32)
-  firstName :string;
+  firstName: string;
 
   @Length(3, 32)
-  LastName :string;
+  LastName: string;
 
   @Length(6, 32)
-  address :string;
-
-
+  address: string;
 }
 
+export interface UserPayload {
+  _id: string;
+  email: string;
+  verified: boolean;
+}
 
-export interface UserPayload{
+export class OrderInputs{
   _id :string;
-  email :string;
-  verified :boolean;
-
+  unit :number;
 }
-
-

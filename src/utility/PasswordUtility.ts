@@ -20,6 +20,7 @@ export const ValidatePassword = async (enteredPassword :string, savedPassword :s
 }
 
 export const GenerateSignature = (payload :AuthPayload) => {
+  console.log('JWT_SECRET :>> ', JWT_SECRET);
   const signature = jwt.sign(payload, JWT_SECRET, {expiresIn: '3d'});
   return signature;
 }
