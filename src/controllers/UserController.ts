@@ -207,6 +207,91 @@ export const EditUserProfile = async (req: Request, res: Response, next: NextFun
   }
 }
 
+/************ CART SECTION    ************** */
+export const AddToCart = async (req: Request, res: Response, next: NextFunction) => {
+  const user = req.user;
+
+  if(user){
+
+    const profile = await User.findById(user._id).populate('cart.food');
+    let cartItems = Array();
+    const { _id, unit} = <OrderInputs>req.body;
+    const food = await Food.findById(_id);
+
+
+    if (food) {
+      if(profile != null){
+        cartItems = profile.cart;
+
+        if (cartItems.length > 0){
+          // check and update unit
+          let existFoodItem = cartItems.filter((item) => item.food._id.toString() === _id)
+
+          if(existFoodItem.length > 0){
+            const index = cartItems.indexOf(existFoodItem[0]);
+            if (unit > 0){
+              cartItems[index] = {food, unit};
+            }
+            else{
+              cartItems.splice(index, 1);
+            }
+          }else{
+            cartItems.push({food, unit});
+          }
+          
+          
+        }
+        else{
+          // add new item to cart
+          cartItems.push({food, unit});
+        }
+
+        if (cartItems){
+          profile.cart = cartItems as any;
+          const cartResult = await profile.save();
+          return res.json(cartResult.cart);
+        }
+
+      }
+    }
+    
+  }
+
+  return res.status(400).json({message : "Error creating Cart"});
+}
+
+export const GetCart = async (req: Request, res: Response, next: NextFunction) => {
+  const user = req.user;
+
+  if(user){
+
+    const profile = await User.findById(user._id).populate('cart.food');
+      if(profile != null){
+          return res.json(profile.cart);
+      }
+  }
+  return res.status(400).json({message : "Cart is empty"});
+}
+
+export const DeleteCart = async (req: Request, res: Response, next: NextFunction) => {
+  const user = req.user;
+
+  if(user){
+    const profile = await User.findById(user._id).populate('cart.food');
+      if(profile != null){
+        profile.cart = [] as any;
+        const cartResult = await profile.save();
+        return res.json(cartResult);
+      }
+  }
+  return res.status(400).json({message : "Cart is already empty"});
+  
+}
+
+/************ CART SECTION END   ************** */
+
+
+
 export const CreateOrder = async (req: Request, res: Response, next: NextFunction) => {
 
   const user = req.user;
@@ -221,6 +306,7 @@ export const CreateOrder = async (req: Request, res: Response, next: NextFunctio
 
     let cartItems = Array();
     let netAmount = 0.0;
+    let vendorId;
 
     // CALCULATE ORDER AMOUNT 
     const foods = await Food.find().where('_id').in(cart.map(item => item._id)).exec();
@@ -228,7 +314,8 @@ export const CreateOrder = async (req: Request, res: Response, next: NextFunctio
     foods.map(food => {
       cart.map(({_id, unit}) => {
         if (food._id == _id){
-          netAmount += (food.price * unit);
+          vendorId = food.vendorId;
+          netAmount += (food.price * unit); 
           cartItems.push({food, unit});
         }
       })
@@ -239,18 +326,25 @@ export const CreateOrder = async (req: Request, res: Response, next: NextFunctio
       const currentOrder = await Order.create({
         orderId: orderId,
         items: cartItems,
+        vendorId: vendorId,
         totalAmount: netAmount,
         orderDate: new Date(),
         paidThrough: "COD",
         paymentResponse: "",
-        orderStatus: "Waiting"
+        orderStatus: "Waiting",
+        remarks: '',
+        deliveryId: '',
+        appliedOffers: false,
+        offerId: null,
+        readyTime: 45
       });
 
       if (currentOrder){
+        profile.cart = [] as any;
         profile.orders.push(currentOrder);
-        await profile.save();
+        const profileSaveResponse = await profile.save();
 
-        return res.json(currentOrder); 
+        return res.json(profileSaveResponse); 
       }
     }
   }

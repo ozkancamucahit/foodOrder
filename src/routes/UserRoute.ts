@@ -2,7 +2,7 @@
 
 
 import express from "express";
-import { CreateOrder, EditUserProfile, GetOrderById, GetOrders, GetUserProfile, RequestOTP, UserLogin, UserSingup, UserVerify } from "../controllers";
+import { AddToCart, CreateOrder, DeleteCart, EditUserProfile, GetCart, GetOrderById, GetOrders, GetUserProfile, RequestOTP, UserLogin, UserSingup, UserVerify } from "../controllers";
 import { Authenticate } from "../middlewares";
 
 
@@ -32,6 +32,10 @@ router.patch('/profile', EditUserProfile);
 
 
 // CART
+router.post('/cart', AddToCart);
+router.get('/cart', GetCart);
+router.delete('/cart', DeleteCart);
+
 // ORDER
 router.post('/create-order', CreateOrder);
 router.get('/orders', GetOrders);

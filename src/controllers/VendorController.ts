@@ -1,9 +1,10 @@
 import { NextFunction, Request, Response } from "express";
-import { CreateVendorInput, EditVendorInputs, VendorLoginInputs } from "../dto";
-import { Food, Vendor } from "../models";
-import { GeneratePassword, GenerateSalt, GenerateSignature, ValidatePassword } from "../utility";
+import { EditVendorInputs, VendorLoginInputs } from "../dto";
+import { Food } from "../models";
+import { GenerateSignature, ValidatePassword } from "../utility";
 import { FindVendor } from "./AdminController";
 import { CreateFoodInputs } from "../dto/Food.dto";
+import { Order } from "../models/Order";
 
 
 export const VendorLogin = async (req: Request, res: Response, next: NextFunction) => {
@@ -169,7 +170,55 @@ export const GetFoods = async (req: Request, res: Response, next: NextFunction) 
 }
 
 
+export const GetCurrentOrders = async (req: Request, res: Response, next: NextFunction) => {
 
+  const user = req.user;
+
+  if(user){
+    const orders = await Order.find({vendorId: user._id}).populate('items.food');
+
+    if (orders != null){
+      return res.json(orders);
+    }
+  }
+  return res.status(400).json({message: "Order info not found"});
+}
+
+export const GetOrderDetails = async (req: Request, res: Response, next: NextFunction) => {
+  const orderId = req.params.id;
+
+  if(orderId){
+    const order = await Order.findById(orderId).populate('items.food');
+
+    if (order != null){
+      return res.json(order);
+    }
+  }
+  return res.status(400).json({message: "Order info not found"});
+}
+
+export const ProcessOrder = async (req: Request, res: Response, next: NextFunction) => {
+  const orderId = req.params.id;
+  const {status, remarks, time} = req.body;
+
+  if(orderId){
+    const order = await Order.findById(orderId).populate('items.food');
+
+    if (order != null){
+      order.orderStatus = status;
+      order.remarks = remarks;
+      if(time){
+        order.readyTime = time;
+      }
+      const orderResult = await order.save();
+
+      if (orderResult !== null){
+        return res.json(orderResult);
+      }
+    }
+  }
+  return res.status(400).json({message: "Unable to process order"});
+}
 
 
 

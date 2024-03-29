@@ -15,6 +15,7 @@ interface UserDoc extends Document{
   otp_expiry: Date;
   lat: number;
   lon: number;
+  cart: [any];
   orders: [OrderDoc];
 
 };
@@ -33,6 +34,12 @@ const UserSchema = new Schema(
     otp_expiry: {type: Date, required: true},
     lat: {type: Number},
     lon: {type: Number},
+    cart: [
+      {
+        food: {type: Schema.Types.ObjectId, ref: 'food', required: true},
+        unit: {type: Number, required: true}
+      }
+    ],
     orders: [
       {
         type: Schema.Types.ObjectId,
