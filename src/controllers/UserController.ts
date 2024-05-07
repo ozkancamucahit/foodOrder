@@ -342,9 +342,9 @@ export const CreateOrder = async (req: Request, res: Response, next: NextFunctio
       if (currentOrder){
         profile.cart = [] as any;
         profile.orders.push(currentOrder);
-        const profileSaveResponse = await profile.save();
+        await profile.save();
 
-        return res.json(profileSaveResponse); 
+        return res.json(currentOrder); 
       }
     }
   }

@@ -1,10 +1,11 @@
 import { NextFunction, Request, Response } from "express";
-import { EditVendorInputs, VendorLoginInputs } from "../dto";
+import { CreateOfferInputs, EditVendorInputs, VendorLoginInputs } from "../dto";
 import { Food } from "../models";
 import { GenerateSignature, ValidatePassword } from "../utility";
 import { FindVendor } from "./AdminController";
 import { CreateFoodInputs } from "../dto/Food.dto";
 import { Order } from "../models/Order";
+import { Offer } from "../models/Offer";
 
 
 export const VendorLogin = async (req: Request, res: Response, next: NextFunction) => {
@@ -218,6 +219,142 @@ export const ProcessOrder = async (req: Request, res: Response, next: NextFuncti
     }
   }
   return res.status(400).json({message: "Unable to process order"});
+}
+
+export const GetOffers = async (req: Request, res: Response, next: NextFunction) => {
+
+  const user = req.user;
+
+  if(user){
+    const offers = await Offer.find().populate('vendors');
+
+    let currentOffers = Array();
+    if(offers){
+      
+      
+      offers.map(item => {
+        if(item.vendors){
+          item.vendors.map(vendor => {
+            if(vendor._id.toString() === user._id){
+              currentOffers.push(item);
+            }
+          });
+        }
+
+        if (item.offerType === 'GENERIC'){
+          currentOffers.push(item);
+        }
+        
+        
+      });
+
+      return res.json(currentOffers)
+
+    }
+
+    else{
+      // no offer found
+      return res.sendStatus(204);
+    }
+  }
+
+
+  return res.status(400).json({message: "Unable to process request"});
+}
+
+
+export const AddOffer = async (req: Request, res: Response, next: NextFunction) => {
+
+  const user = req.user;
+
+  if(user){
+    const {title, description, offerType, offerAmount, pincode,
+      promoCode, promoType, startValidity, endValidity, bank, bins, minValue
+      ,isActive
+    } = <CreateOfferInputs>req.body;
+
+    const vendor = await FindVendor(user._id);
+
+    console.log('Found Vendor :>> ', vendor);
+
+    if(vendor){
+      const offer = await Offer.create({
+        title,
+        description,
+        offerType,
+        offerAmount,
+        pincode,
+        promoCode,
+        promoType,
+        startValidity,
+        endValidity,
+        bank,
+        bins,
+        isActive,
+        minValue,
+        vendors:[vendor]
+      });
+
+      console.log('offer :>> ', offer);
+      return res.json(offer);
+
+    }
+
+  return res.status(400).json({message: "Unable to add offer"});
+
+  }
+
+  return res.status(400).json({message: "Unable to process offer"});
+
+}
+
+export const EditOffer = async (req: Request, res: Response, next: NextFunction) => {
+
+  const user = req.user;
+  const offerId = req.params.id
+
+  if(user){
+    const {title, description, offerType, offerAmount, pincode,
+      promoCode, promoType, startValidity, endValidity, bank, bins, minValue
+      ,isActive
+    } = <CreateOfferInputs>req.body;
+
+    const currentOffer = await Offer.findById(offerId);
+
+    if (currentOffer){
+      const vendor = await FindVendor(user._id);
+
+      if(vendor){
+
+          currentOffer.title = title;
+          currentOffer.description = description;
+          currentOffer.offerType = offerType;
+          currentOffer.offerAmount = offerAmount;
+          currentOffer.pincode = pincode;
+          currentOffer.promoCode = promoCode;
+          currentOffer.promoType = promoType;
+          currentOffer.startValidity = startValidity;
+          currentOffer.endValidity = endValidity;
+          currentOffer.bank = bank;
+          currentOffer.bins = bins;
+          currentOffer.isActive = isActive;
+          currentOffer.minValue = minValue;
+
+          const result = await currentOffer.save();
+
+        return res.json(result);
+      }
+
+      return res.status(400).json({message: "Unable to find vendor"});
+    }
+
+    
+
+  return res.status(400).json({message: "Unable to add offer"});
+
+  }
+
+  return res.status(400).json({message: "Unable to process offer"});
 }
 
 

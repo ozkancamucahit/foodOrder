@@ -32,7 +32,7 @@ export const ValidateSignature = async (req: Request) => {
   if(signature){
     const paylaod = await jwt.verify(signature.split(' ')[1], JWT_SECRET) as AuthPayload;
 
-    req.user = paylaod;
+    req.user = paylaod; 
     return true;
 
   }

@@ -1,6 +1,8 @@
 
 import express, {Request, Response, NextFunction} from "express";
-import { AddFood, GetCurrentOrders, GetFoods, GetOrderDetails, GetVendorProfile, ProcessOrder, UpdateVendorCoverImage, UpdateVendorProfile, UpdateVendorService, VendorLogin } from "../controllers";
+import { AddFood, AddOffer, EditOffer, GetCurrentOrders, 
+  GetFoods, GetOffers, GetOrderDetails, GetVendorProfile, ProcessOrder, 
+  UpdateVendorCoverImage, UpdateVendorProfile, UpdateVendorService, VendorLogin } from "../controllers";
 import { Authenticate } from "../middlewares";
 import multer from 'multer';
 
@@ -27,10 +29,10 @@ router.post('/login', VendorLogin);
 // require authentication for below actions
 router.use(Authenticate);
 // router.get('/profile', Authenticate, GetVendorProfile);
-router.get('/profile', Authenticate, GetVendorProfile);
-router.patch('/profile', UpdateVendorProfile);
+router.get('/profile',      GetVendorProfile);
+router.patch('/profile',    UpdateVendorProfile);
 router.patch('/coverImage', images, UpdateVendorCoverImage);
-router.patch('/service', UpdateVendorService);
+router.patch('/service',    UpdateVendorService);
 
 router.get('/foods', GetFoods);
 
@@ -39,10 +41,15 @@ router.post('/food', images, AddFood);
 
 // Orders
 
-router.get('/orders', GetCurrentOrders);
-router.put('/order/:id/process', ProcessOrder);
-router.get('/order/:id', GetOrderDetails);
+router.get('/orders',             GetCurrentOrders);
+router.put('/order/:id/process',  ProcessOrder);
+router.get('/order/:id',          GetOrderDetails);
 
+// OFFERS
+
+router.get('/offers',     GetOffers);
+router.post('/offer',     AddOffer);
+router.put('/offer/:id',  EditOffer);
 
 
 export {router as VendorRoute}

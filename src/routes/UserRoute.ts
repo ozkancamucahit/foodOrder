@@ -2,7 +2,9 @@
 
 
 import express from "express";
-import { AddToCart, CreateOrder, DeleteCart, EditUserProfile, GetCart, GetOrderById, GetOrders, GetUserProfile, RequestOTP, UserLogin, UserSingup, UserVerify } from "../controllers";
+import { AddToCart, CreateOrder, DeleteCart, 
+  EditUserProfile, GetCart, GetOrderById, GetOrders, 
+  GetUserProfile, RequestOTP, UserLogin, UserSingup, UserVerify } from "../controllers";
 import { Authenticate } from "../middlewares";
 
 
