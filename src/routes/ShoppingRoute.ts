@@ -1,5 +1,5 @@
 import express, {Request, Response, NextFunction} from "express";
-import { GetFoodAvailability, GetFoodsIn30Mins, GetRestaurantById, GetTopRestaurants, SearchFoods } from "../controllers";
+import { GetAvailableOffers, GetFoodAvailability, GetFoodsIn30Mins, GetRestaurantById, GetTopRestaurants, SearchFoods } from "../controllers";
 
 
 
@@ -18,6 +18,9 @@ router.get('/foods-in-30-mins/:pincode', GetFoodsIn30Mins);
 
 /** ------ SEARCH FOODS --------- */
 router.get('/search/:pincode', SearchFoods);
+
+/** ------ FIND OFFERS --------- */
+router.get('/offers/:pincode',  GetAvailableOffers);
 
 /** ------ FIND RESTAURANT BY ID --------- */
 router.get('/restaurant/:id', GetRestaurantById);

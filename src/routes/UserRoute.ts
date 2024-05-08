@@ -2,9 +2,10 @@
 
 
 import express from "express";
-import { AddToCart, CreateOrder, DeleteCart, 
+import { AddToCart, CreateOrder, CreatePayment, DeleteCart, 
   EditUserProfile, GetCart, GetOrderById, GetOrders, 
-  GetUserProfile, RequestOTP, UserLogin, UserSingup, UserVerify } from "../controllers";
+  GetUserProfile, RequestOTP, UserLogin, UserSingup, UserVerify, 
+  VerifyOffer} from "../controllers";
 import { Authenticate } from "../middlewares";
 
 
@@ -37,6 +38,13 @@ router.patch('/profile', EditUserProfile);
 router.post('/cart', AddToCart);
 router.get('/cart', GetCart);
 router.delete('/cart', DeleteCart);
+
+// Apply Offers
+router.get('/offer/verify/:id', VerifyOffer);
+
+
+//PAYMENT
+router.post('/create-payment', CreatePayment);
 
 // ORDER
 router.post('/create-order', CreateOrder);
